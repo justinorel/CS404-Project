@@ -15,7 +15,7 @@ public class FloydWarshall
     private static int[][] FlowMatrix;
     private static int[][] AllPairsMatrix; //All-pairs matrix for finding Shortest Path
     private static int[][] PRMatrix; //matrix for Path Reconstruction
-    private static int[][] LoadTrafficMatrix; //Matrix with actual traffic on all roads
+    private static int[][] TrafficMatrix; //Matrix with actual traffic on all roads
     private static int[][][] ShortestPaths; //Contains shortest path for all nodes to all other nodes
     private static int[][] CalculationsMatrix; //Used to store each of the min/max calculations before output
     private static double[][] AverageMatrix; //Used to store average traffic
@@ -40,7 +40,7 @@ public class FloydWarshall
         this.numberOfVertices = numberOfVertices;
         FlowMatrix = flowMatrix;
         ShortestPaths = new int[numberOfVertices + 1][numberOfVertices +1][];
-        LoadTrafficMatrix = new int[numberOfVertices + 1][numberOfVertices +1];
+        TrafficMatrix = new int[numberOfVertices + 1][numberOfVertices +1];
         PRMatrix = new int[numberOfVertices + 1][numberOfVertices +1];
     }
 
@@ -135,7 +135,7 @@ public class FloydWarshall
         }
     }
 
-    public static void buildLoadMatrix(){
+    public static void buildTrafficMatrix(){
 
         //Use getPath function to get shortest path between vertices and add each path to matrix
         for(int i = 1; i < ShortestPaths.length; i++) {
@@ -146,16 +146,16 @@ public class FloydWarshall
                         int b = ShortestPaths[i][j][k];
 
                         //add flow along path into LoadMatrix
-                        LoadTrafficMatrix[a][b] += FlowMatrix[i][j];
+                        TrafficMatrix[a][b] += FlowMatrix[i][j];
                     }
             }
         }
 
         //Get rid of 0's in Load Matrix for paths that don't exist
-        for(int i = 1; i < LoadTrafficMatrix.length; i++) {
-            for (int j = 1; j < LoadTrafficMatrix.length; j++) {
+        for(int i = 1; i < TrafficMatrix.length; i++) {
+            for (int j = 1; j < TrafficMatrix.length; j++) {
                 if (EdgeMatrix[i][j] == INF){
-                        LoadTrafficMatrix[i][j] = INF;
+                        TrafficMatrix[i][j] = INF;
                 }
             }
         }
@@ -178,8 +178,8 @@ public class FloydWarshall
                     int a = ShortestPaths[i][j][k-1];
                     int b = ShortestPaths[i][j][k];
 
-                    if (LoadTrafficMatrix[a][b] < min){
-                        min = LoadTrafficMatrix[a][b];
+                    if (TrafficMatrix[a][b] < min){
+                        min = TrafficMatrix[a][b];
                     }
                 }
                 if (i == j){
@@ -204,8 +204,8 @@ public class FloydWarshall
                     int a = ShortestPaths[i][j][k-1];
                     int b = ShortestPaths[i][j][k];
 
-                    if (LoadTrafficMatrix[a][b] > max){
-                        max = LoadTrafficMatrix[a][b];
+                    if (TrafficMatrix[a][b] > max){
+                        max = TrafficMatrix[a][b];
                     }
                 }
                 if (i == j){
@@ -232,7 +232,7 @@ public class FloydWarshall
                     int a = ShortestPaths[i][j][k-1];
                     int b = ShortestPaths[i][j][k];
 
-                    sum += LoadTrafficMatrix[a][b];
+                    sum += TrafficMatrix[a][b];
                     count++;
                 }
                 if (count != 0) {
@@ -373,18 +373,18 @@ public class FloydWarshall
 
             //Build Load Matrix
             startTime = System.nanoTime();
-            fw.buildLoadMatrix();
+            fw.buildTrafficMatrix();
             endTime = System.nanoTime();
             runningTime = endTime - startTime;
             totalRunningTime += runningTime;
             writer.newLine();
             writer.write("LoadMatrix:" ); writer.newLine();
-            printMatrix(LoadTrafficMatrix, writer);
+            printMatrix(TrafficMatrix, writer);
             writer.write("Computation took " + (runningTime / 1000000) + " milliseconds" ); writer.newLine();
 
             //All-Pairs Sneaky Matrix
             startTime = System.nanoTime();
-            fw.implementFW(LoadTrafficMatrix);
+            fw.implementFW(TrafficMatrix);
             endTime = System.nanoTime();
             runningTime = endTime - startTime;
             totalRunningTime += runningTime;
